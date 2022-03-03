@@ -16,9 +16,8 @@ const distinct = (value, index, self) => {
 // Funcion que renedeiza la pantalla completa
 function renderScreen() {
   eventsTable(data_json);
-  let events, correlation__values;
-  [events, correlation__values] = processData(data_json);
-  correaltionTable(events, correlation__values);
+  let correlation_table = processData(data_json);
+  correaltionTable(correlation_table);
 }
 
 // Funcion que procesa los datos
@@ -49,17 +48,26 @@ function processData(data_json) {
         FP++;
       }
     });
-    let MCC = ((TP * TN - FP * FN)/Math.sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN * FN)));
+    let MCC = ((TP * TN - FP * FN)/Math.sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)));
+
     MCCs = MCCs.concat(MCC);
     console.log("event", dist, "TP", TP, "TN",TN,"FP",FP,"FN",FN,"MCC",MCC)
   });
-  return [distintos, MCCs];
+  let objects = Array()
+  for(let j = 0; j < distintos.length; j++){
+      objects.push({event:distintos[j],value:MCCs[j]})
+  }
+  
+  objects.sort(function(a, b) {
+    return ((a.value > b.value) ? -1 : ((a.value == b.value) ? 0 : 1));
+    });
+  return objects;
 }
 
 // Funcion que renderiza la tabla de correlaciones
-function correaltionTable(events, correlation__values) {
+function correaltionTable(correlation_table) {
   let id = 0;
-  events.forEach((event) => {
+  correlation_table.forEach((element) => {
     tableBody = document.getElementById("CuerpoTablaCorrelacion");
 
     let row_element = document.createElement("tr");
@@ -67,8 +75,8 @@ function correaltionTable(events, correlation__values) {
     let column1_element = document.createElement("td");
     let column2_element = document.createElement("td");
     let id_node = document.createTextNode(id + 1);
-    let column1_node = document.createTextNode(event);
-    let column2_node = document.createTextNode(correlation__values[id]);
+    let column1_node = document.createTextNode(element.event);
+    let column2_node = document.createTextNode(element.value);
     id_element.appendChild(id_node);
     column1_element.appendChild(column1_node);
     column2_element.appendChild(column2_node);
